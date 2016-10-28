@@ -11,6 +11,8 @@ var sendUnknownType = require('./src/ws/sendUnknownType.js');
 var prepareChatMessage = require('./src/ws/prepareChatMessage.js');
 var prepareGoodbyeMessage = require('./src/ws/prepareGoodbyeMessage.js');
 var sendInventory = require('./src/ws/sendInventory.js');
+var sendLight = require('./src/ws/sendLight.js');
+var sendRub = require('./src/ws/sendRub.js');
 var sendExamine = require('./src/ws/sendExamine.js');
 var parseGoCommand = require('./src/ws/parseGoCommand.js');
 var sendUnknownCommand = require('./src/ws/sendUnknownCommand.js');
@@ -22,8 +24,8 @@ var gameonSecret = (process.env.GAMEON_SECRET || '');
 // Room Details
 // Your room's name
 var theRoomName = (process.env.ROOM_NAME || '');
-var fullName = (process.env.FULL_NAME || '');
-var description = (process.env.DESCRIPTION || 'This room is filled with little JavaScripts running around everywhere and a monster');
+var fullName = (process.env.FULL_NAME || "Aladdin's cave");
+var description = (process.env.DESCRIPTION || 'You have entered a pitch black room, you think it is room, but the vast expanse of darkness makes you wonder');
 // The hostname of your CF application
 var vcapApplication = (process.env.VCAP_APPLICATION || '{}');
 var appUris = (vcapApplication.application_uris || ['localhost']);
@@ -56,6 +58,11 @@ var registration = {
         "w": "A round door",
     },
 }
+
+//Player Details
+var players = {};
+//Room Inventory
+var roomInventory = ["magic lamp", "A wall with glowing writing"];
 
 //Register the service if credentials are given
 register(gameonUID, gameonSecret, registration, logger);
@@ -93,8 +100,9 @@ var wsServer = ws.createServer(function(conn) {
                 broadcast(prepareChatMessage(conn, object.username, object.content));
             }
         } else if (messageType === "roomGoodbye") {
-            logger.debug("Announcing that \"" + username + "\" has left the room.")
+            logger.debug("Announcing that \"" + object.username + "\" has left the room.")
             broadcast(prepareGoodbyeMessage(conn, object.userId, object.username))
+            players[object.username] = {isLightOn : false};
         } else {
             sendUnknownType(conn, object.userId, object.username, messageType, logger);
         }
@@ -124,12 +132,17 @@ function parseCommand(conn, target, username, content) {
     {
       sendHelp(conn, target, username)
     }
-    else if (content.substr(1, 9) == "inventory")
-    {
-      sendInventory(conn, target, username, logger)
-    }*/
-    else if (content.substr(1, 7) == "examine") {
-        sendExamine(conn, target, username, logger);
+    */
+    else if (content.substr(1, 3) == "rub") {
+        sendRub(conn, target, username, content, logger);
+    }
+    else if (content.substr(1, 5) == "light") {
+        players[username].isLightOn = sendLight(conn, target, username, logger);
+    } else if (content.substr(1, 9) == "inventory") {
+        sendInventory(conn, target, username, logger);
+    } else if (content.substr(1, 7) == "examine") {
+        logger.debug("examine details for users \"" + username + " == "+ JSON.stringify(players));
+        sendExamine(conn, target, username, content, players[username].isLightOn, logger);
     } else {
         sendUnknownCommand(conn, target, content, logger);
     }
@@ -142,6 +155,10 @@ function sayHello(conn, target, username) {
         "name": theRoomName,
         "fullName": fullName,
         "description": description,
+        "commands": {
+            "/light": "Turn on the light"
+        },
+        "roomInventory": ["magic lamp", "A wall with glowing writing"]
     }
 
     var sendMessageType = "player"
@@ -152,6 +169,9 @@ function sayHello(conn, target, username) {
         JSON.stringify(responseObject)
 
     conn.sendText(messageText)
+
+    //Store player progress
+    players[username] = {isLightOn : false};
 
     logger.debug("And announcing that \"" + username + "\" has arrived.")
     var broadcastMessageType = "player"

@@ -6,7 +6,7 @@ var sendUnknownCommand = function(conn, target, content, logger) {
           }
         }
 
-    responseObject.content[target] = "Node.js looked at your command, and barfed."
+    responseObject.content[target] = "Call this a command, try again!!"
         var sendMessageType = "player"
         var sendTarget = target
 

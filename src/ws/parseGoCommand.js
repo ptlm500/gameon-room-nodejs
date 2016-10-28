@@ -1,6 +1,7 @@
 var parseGoCommand = function(conn, target, username, content, doors, logger)
 {
-  var exitName = content.substr(4)
+  var exitName = content.substr(4);
+  var exitId = '';
 
   logger.info("Player \"" + username + "\" wants to go direction \"" + exitName + "\"")
 
@@ -51,7 +52,7 @@ var parseGoCommand = function(conn, target, username, content, doors, logger)
       bookmark: 5302
     }
 
-    messageObject.content[target] = "There isn't an exit with that name, genius."
+    messageObject.content[target] = "There isn't an exit with that name, genius. try using NORTH, SOUTH, EAST or WEST"
 
     var messageText = sendMessageType + "," +
               sendTarget + "," +
