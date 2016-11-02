@@ -2,7 +2,7 @@ applications:
 - path: .
   memory: 256M
   instances: 1
-  domain: mybluemix.net 
-  name: kilian-node-room
-  host: kilian-node-room
+  domain: mybluemix.net
+  name: southbank-registration
+  host: southbank-registration
   disk_quota: 1024M

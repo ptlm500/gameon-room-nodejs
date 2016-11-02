@@ -15,6 +15,10 @@ var sendExamine = require('./src/ws/sendExamine.js');
 var parseGoCommand = require('./src/ws/parseGoCommand.js');
 var sendUnknownCommand = require('./src/ws/sendUnknownCommand.js');
 
+var sendRooms = require('./src/ws/sendRooms.js');
+var sendRegistration = require('./src/ws/sendRegistration.js');
+var sendRules = require('./src/ws/sendRules.js');
+
 // User credentials
 var gameonUID = (process.env.GAMEON_ID || '');
 var gameonSecret = (process.env.GAMEON_SECRET || '');
@@ -22,14 +26,16 @@ var gameonSecret = (process.env.GAMEON_SECRET || '');
 // Room Details
 // Your room's name
 var theRoomName = (process.env.ROOM_NAME || '');
-var fullName = (process.env.FULL_NAME || '');
-var description = (process.env.DESCRIPTION || 'This room is filled with little JavaScripts running around everywhere and a monster');
+var fullName = (process.env.FULL_NAME || 'SouthBank registration room');
+var description = (process.env.DESCRIPTION || 'This room is where you register to join in the Southbank Microservice Hack');
 // The hostname of your CF application
 var vcapApplication = (process.env.VCAP_APPLICATION || '{}');
 var appUris = (vcapApplication.application_uris || ['localhost']);
 var endpointip = appUris[0];
 // Automatically retrieves the port of your CF
 var port = (process.env.CF_INSTANCE_PORT || 3000);
+
+var rooms = [];
 
 var logger = new winston.Logger({
     level: 'debug',
@@ -128,6 +134,15 @@ function parseCommand(conn, target, username, content) {
     {
       sendInventory(conn, target, username, logger)
     }*/
+    else if (content.substr(1, 5) == "rules") {
+        sendRules(conn, target, username, logger);
+    }
+    else if (content.substr(1, 8) == "register") {
+        rooms = sendRegistration(conn, target, username,content, rooms, logger);
+    }
+    else if (content.substr(1, 5) == "rooms") {
+        sendRooms(conn, target, username, rooms, logger);
+    }
     else if (content.substr(1, 7) == "examine") {
         sendExamine(conn, target, username, logger);
     } else {
@@ -142,6 +157,11 @@ function sayHello(conn, target, username) {
         "name": theRoomName,
         "fullName": fullName,
         "description": description,
+        "commands": {
+            "/rules": "The rules and description for the Southbank Hackday",
+            "/register" : "How you register your room to the hackday, '/register <your_room_name>'",
+            "/rooms" : "Lists all the rooms registered to the hackday"
+        },
     }
 
     var sendMessageType = "player"
