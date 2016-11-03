@@ -122,8 +122,11 @@ process.on('SIGINT', function() {
 
 function parseCommand(conn, target, username, content) {
     if (content.substr(1, 3) == "go ") {
-        if ()
-        parseGoCommand(conn, target, username, content, registration.doors, logger);
+        if (keys.unlocked) {
+          parseGoCommand(conn, target, username, content, registration.doors, logger);
+        } else {
+          sendlockingError(conn, target, username, logger)
+        }
     }
     /*else if (content.substr(1, 5) == "exits")
     {
@@ -167,6 +170,26 @@ function lock(conn, target, username, logger) {
   } else {
     messageObject.content[target] = "The doors are already locked..."
   }
+
+  var messageToSend = sendMessageType + "," +
+            sendTarget + "," +
+            JSON.stringify(messageObject)
+
+  conn.sendText(messageToSend)
+}
+
+function sendlockingError(conn, target, username, logger) {
+  logger.info("Player \"" + target + "\" is trying the door")
+  var sendTarget = target
+  var sendMessageType = "player"
+  var messageObject = {
+    type: "event",
+    bookmark: 2223,
+    content: {
+    }
+  }
+
+  messageObject.content[target] = "The doors are locked. Have you not worked out the key yet?"
 
   var messageToSend = sendMessageType + "," +
             sendTarget + "," +
