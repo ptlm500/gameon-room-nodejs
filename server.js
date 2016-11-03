@@ -23,7 +23,7 @@ var gameonSecret = (process.env.GAMEON_SECRET || '');
 // Your room's name
 var theRoomName = (process.env.ROOM_NAME || 'room101');
 var fullName = (process.env.FULL_NAME || 'Room 101');
-var description = (process.env.DESCRIPTION || 'This room is filled with little JavaScripts running around everywhere and a monster');
+var description = (process.env.DESCRIPTION || 'All the doors are locked... you must answer the /question to get the access key');
 // The hostname of your CF application
 var vcapApplication = (process.env.VCAP_APPLICATION || '{}');
 var appUris = (vcapApplication.application_uris || ['localhost']);
@@ -60,10 +60,12 @@ var registration = {
 //Puzzle data
 var keys = {
   "unlocked": false,
-  "masterKey": "1997"
+  "masterKey": "1991"
 }
 
-var activePuzzle = 1;
+var activePuzzle = 0;
+
+var answers = [1, 99, 1];
 
 //Register the service if credentials are given
 register(gameonUID, gameonSecret, registration, logger);
@@ -140,7 +142,10 @@ function parseCommand(conn, target, username, content) {
     {
       sendInventory(conn, target, username, logger)
     }*/
-    else if (content.substr(1, 6) == "repeat") {
+    else if (content.substr(1, 6) == "answer") {
+      checkAnswer(conn, target, username, content.substr(8))
+    }
+    else if (content.substr(1, 8) == "question") {
       printQuestion(conn, target, username, logger)
     }
     else if (content.substr(1, 4) == "lock") {
@@ -156,6 +161,55 @@ function parseCommand(conn, target, username, content) {
     }
 }
 
+function checkAnswer(conn, target, username, userAnswer) {
+  logger.info("Checking answer for " + activePuzzle)
+
+  if (userAnswer == answers[activePuzzle]) {
+    correctAnswer(conn, target, username)
+  } else {
+    incorrectAnswer(conn, target, username, userAnswer)
+  }
+}
+
+function correctAnswer(conn, target, username) {
+  var sendTarget = target
+  var sendMessageType = "player"
+  var messageObject = {
+    type: "event",
+    bookmark: 2223,
+    content: {
+    }
+  }
+
+  messageObject.content[target] = "Correct! Remember that number."
+  activePuzzle ++
+
+  var messageToSend = sendMessageType + "," +
+            sendTarget + "," +
+            JSON.stringify(messageObject)
+
+  conn.sendText(messageToSend)
+}
+
+function incorrectAnswer(conn, target, username, userAnswer) {
+  var sendTarget = target
+  var sendMessageType = "player"
+  var messageObject = {
+    type: "event",
+    bookmark: 2223,
+    content: {
+    }
+  }
+
+  messageObject.content[target] = "Sorry, that was not the right answer."
+
+  var messageToSend = sendMessageType + "," +
+            sendTarget + "," +
+            JSON.stringify(messageObject)
+
+  conn.sendText(messageToSend)
+}
+
 function printQuestion(conn, target, username, logger) {
   logger.info("Printing question " + activePuzzle)
 
@@ -169,8 +223,14 @@ function printQuestion(conn, target, username, logger) {
   }
 
   switch (activePuzzle) {
+    case 0:
+      messageObject.content[target] = "A man on his way to St Ives has seven wives. Each wife has seven sisters. Each sister has seven sacks. Each sack has seven cats and each cat has seven kittens. Man, wives, sisters, sacks, cats, kittens- how many are going to St. Ives?"
+      break;
     case 1:
-      messageObject.content[target] = "A man on his way to St Ives has seven wives. Each wife has seven sisters. Each sister has seven sacks. Each sack has seven cats and each cat has seven kittens. Man, wives, sisters, sacks, cats, kittens how many are going to St. Ives?"
+      messageObject.content[target] = "The man is curious about death and asks a prophet “How old will I be when I die? The prophet replies: “Kittens over bad luck squared” At what age will the man die?"
+      break;
+    case 2:
+      messageObject.content[target] = "Which number do a unicorn an ace and a dromedary camel have in common?"
       break;
     default:
       logger.info("Couldn't find question")

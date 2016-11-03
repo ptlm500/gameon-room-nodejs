@@ -29,3 +29,5 @@
 {"level":"info","message":"The WebSocket server is listening...","timestamp":"2016-11-03T14:46:51.011Z"}
 {"level":"info","message":"Not registering as no valid config is available","timestamp":"2016-11-03T15:16:33.818Z"}
 {"level":"info","message":"The WebSocket server is listening...","timestamp":"2016-11-03T15:16:33.828Z"}
+{"level":"info","message":"Not registering as no valid config is available","timestamp":"2016-11-03T15:35:37.788Z"}
+{"level":"info","message":"The WebSocket server is listening...","timestamp":"2016-11-03T15:35:37.798Z"}
