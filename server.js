@@ -50,17 +50,17 @@ var registration = {
         "target": "ws://" + endpointip,
     },
     "doors": {
-        "n": "A big door",
-        "s": "A small door",
-        "e": "A wobbly door",
-        "w": "A round door",
+        "n": "Plain steel door.",
+        "s": "Plain steel door.",
+        "e": "Plain steel door.",
+        "w": "Plain steel door.",
     },
 }
 
 //Puzzle data
 var keys = {
   "unlocked": false,
-  "masterKey": 1997
+  "masterKey": "1997"
 }
 
 var activePuzzle;
@@ -122,6 +122,7 @@ process.on('SIGINT', function() {
 
 function parseCommand(conn, target, username, content) {
     if (content.substr(1, 3) == "go ") {
+        if ()
         parseGoCommand(conn, target, username, content, registration.doors, logger);
     }
     /*else if (content.substr(1, 5) == "exits")
@@ -136,6 +137,9 @@ function parseCommand(conn, target, username, content) {
     {
       sendInventory(conn, target, username, logger)
     }*/
+    else if (content.substr(1, 4) == "lock") {
+      lock(conn, target, username, logger)
+    }
     else if (content.substr(1, 6) == "trykey") {
       tryKey(conn, target, username, logger, content.substr(8, 12))
     }
@@ -144,6 +148,31 @@ function parseCommand(conn, target, username, content) {
     } else {
         sendUnknownCommand(conn, target, content, logger);
     }
+}
+
+function lock(conn, target, username, logger) {
+  logger.info("Locking the doors...")
+  var sendTarget = target
+  var sendMessageType = "player"
+  var messageObject = {
+    type: "event",
+    bookmark: 2223,
+    content: {
+    }
+  }
+
+  if (keys.unlocked) {
+    keys.unlocked = false
+    messageObject.content[target] = "Locking the doors. I hope you have the key handy..."
+  } else {
+    messageObject.content[target] = "The doors are already locked..."
+  }
+
+  var messageToSend = sendMessageType + "," +
+            sendTarget + "," +
+            JSON.stringify(messageObject)
+
+  conn.sendText(messageToSend)
 }
 
 function tryKey(conn, target, username, logger, testKey) {
