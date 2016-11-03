@@ -63,7 +63,7 @@ var keys = {
   "masterKey": "1997"
 }
 
-var activePuzzle;
+var activePuzzle = 1;
 
 //Register the service if credentials are given
 register(gameonUID, gameonSecret, registration, logger);
@@ -140,6 +140,9 @@ function parseCommand(conn, target, username, content) {
     {
       sendInventory(conn, target, username, logger)
     }*/
+    else if (content.substr(1,) == "repeat") {
+      printQuestion(conn, target, username, logger)
+    }
     else if (content.substr(1, 4) == "lock") {
       lock(conn, target, username, logger)
     }
@@ -151,6 +154,34 @@ function parseCommand(conn, target, username, content) {
     } else {
         sendUnknownCommand(conn, target, content, logger);
     }
+}
+
+function printQuestion(conn, targer, username, logger) {
+  logger.info("Printing question " + activePuzzle)
+
+  var sendTarget = target
+  var sendMessageType = "player"
+  var messageObject = {
+    type: "event",
+    bookmark: 2223,
+    content: {
+    }
+  }
+
+  switch (activePuzzle) {
+    case 1:
+      messageObject.content[target] = "A man on his way to St Ives has seven wives. Each wife has seven sisters. Each sister has seven sacks. Each sack has seven cats and each cat has seven kittens. Man, wives, sisters, sacks, cats, kittens how many are going to St. Ives?"
+      break;
+    default:
+      logger.info("Couldn't find question")
+      break;
+  }
+
+  var messageToSend = sendMessageType + "," +
+            sendTarget + "," +
+            JSON.stringify(messageObject)
+
+  conn.sendText(messageToSend)
 }
 
 function lock(conn, target, username, logger) {
