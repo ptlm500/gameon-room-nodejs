@@ -50,17 +50,17 @@ var registration = {
         "target": "ws://" + endpointip,
     },
     "doors": {
-        "n": "A big door",
-        "s": "A small door",
-        "e": "A wobbly door",
-        "w": "A round door",
+        "n": "Plain steel door.",
+        "s": "Plain steel door.",
+        "e": "Plain steel door.",
+        "w": "Plain steel door.",
     },
 }
 
 //Puzzle data
 var keys = {
   "unlocked": false,
-  "masterKey": 1997
+  "masterKey": "1997"
 }
 
 var activePuzzle;
