@@ -156,7 +156,7 @@ function parseCommand(conn, target, username, content) {
     }
 }
 
-function printQuestion(conn, targer, username, logger) {
+function printQuestion(conn, target, username, logger) {
   logger.info("Printing question " + activePuzzle)
 
   var sendTarget = target
