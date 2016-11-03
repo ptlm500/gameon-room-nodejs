@@ -21,8 +21,8 @@ var gameonSecret = (process.env.GAMEON_SECRET || '');
 
 // Room Details
 // Your room's name
-var theRoomName = (process.env.ROOM_NAME || '');
-var fullName = (process.env.FULL_NAME || '');
+var theRoomName = (process.env.ROOM_NAME || 'room101');
+var fullName = (process.env.FULL_NAME || 'Room 101');
 var description = (process.env.DESCRIPTION || 'This room is filled with little JavaScripts running around everywhere and a monster');
 // The hostname of your CF application
 var vcapApplication = (process.env.VCAP_APPLICATION || '{}');
